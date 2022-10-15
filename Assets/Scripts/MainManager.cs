@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -11,6 +9,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -18,7 +17,32 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
+    private void Awake()
+    {
+        SaveData data = SaveData.Instance;
+
+        SaveData.Score[] scores = data.Scores;
+
+        if(scores.Length > 0)
+        {
+            SaveData.Score lastScore = scores[scores.Length - 1];
+
+            GameData.Instance.HighestScoreOwnerName = lastScore.name;
+            GameData.Instance.HighestScore = lastScore.points;
+
+            UpdateScoreText();
+        }
+        else
+        {
+            BestScoreText.text = "Best score:- Name:-";
+        }
+    }
     
+    private void UpdateScoreText()
+    {
+        BestScoreText.text = $"Best score: {GameData.Instance.HighestScore} Name: {GameData.Instance.HighestScoreOwnerName}";
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -65,12 +89,39 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = $"Score : {m_Points}";        
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+
+        if (m_Points > GameData.Instance.HighestScore)
+        {
+            GameData.Instance.HighestScore = m_Points;
+            GameData.Instance.HighestScoreOwnerName = GameData.Instance.UserName;
+
+            UpdateScoreText();
+
+            SaveData.Instance.AddScore(GameData.Instance.HighestScoreOwnerName, GameData.Instance.HighestScore);
+            SaveData.Save();
+        }
+    }
+
+    public void Exit()
+    {
+        if (m_Points > GameData.Instance.HighestScore)
+        {
+            GameData.Instance.HighestScore = m_Points;
+            GameData.Instance.HighestScoreOwnerName = GameData.Instance.UserName;
+
+            UpdateScoreText();
+
+            SaveData.Instance.AddScore(GameData.Instance.HighestScoreOwnerName, GameData.Instance.HighestScore);
+            SaveData.Save();
+        }
+
+        SceneManager.LoadScene(0, LoadSceneMode.Single);
     }
 }

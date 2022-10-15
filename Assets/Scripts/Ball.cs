@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Ball : MonoBehaviour
@@ -31,6 +28,6 @@ public class Ball : MonoBehaviour
             velocity = velocity.normalized * 3.0f;
         }
 
-        m_Rigidbody.velocity = velocity;
+        m_Rigidbody.velocity = velocity;        
     }
 }
